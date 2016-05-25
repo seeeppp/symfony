@@ -530,11 +530,35 @@ abstract class Kernel implements KernelInterface, TerminableInterface
         $parameters = array();
         foreach ($_SERVER as $key => $value) {
             if (0 === strpos($key, 'SYMFONY__')) {
-                $parameters[strtolower(str_replace('__', '.', substr($key, 9)))] = $value;
+                $parameters[strtolower(str_replace('__', '.', substr($key, 9)))] = $this->normalizeEnvValue($value);
             }
         }
 
         return $parameters;
+    }
+
+    /**
+     * Normalize env variable.
+     *
+     * @param string $value
+     *
+     * @return mixed
+     */
+    protected function normalizeEnvValue($value)
+    {
+        if ('true' === $value) {
+            return true;
+        }
+
+        if ('false' === $value) {
+            return false;
+        }
+
+        if (ctype_digit($value)) {
+            return (int) $value;
+        }
+
+        return $value;
     }
 
     /**

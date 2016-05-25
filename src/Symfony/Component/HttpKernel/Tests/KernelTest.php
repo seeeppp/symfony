@@ -149,6 +149,28 @@ class KernelTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($found);
     }
 
+    public function testEnvParametersAreNormalized()
+    {
+        $_SERVER['SYMFONY__FOO'] = 'true';
+        $_SERVER['SYMFONY__BAR'] = '1';
+
+        $kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\Tests\Fixtures\KernelForTest')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $expected = [
+            'foo' => true,
+            'bar' => 1,
+        ];
+
+        $reflection = new \ReflectionClass(get_class($kernel));
+        $method = $reflection->getMethod('getEnvParameters');
+        $method->setAccessible(true);
+        $params = $method->invoke($kernel);
+
+        $this->assertEquals($expected, $params);
+    }
+
     public function testBootKernelSeveralTimesOnlyInitializesBundlesOnce()
     {
         $kernel = $this->getKernel(array('initializeBundles', 'initializeContainer'));
